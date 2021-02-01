@@ -51,7 +51,7 @@ function main(args)
     for h5_file_path in list_h5
         file_count += 1
         @printf("Processing %s (%d of %d)...\n", h5_file_path, file_count, n_files)
-        in_h5 = h5open(args[1], "r")
+        in_h5 = h5open(h5_file_path, "r")
         # HDF5.delete_object(ds_pavd)
         groups = keys(in_h5)
         groups = groups[startswith.(groups, "BEAM")]

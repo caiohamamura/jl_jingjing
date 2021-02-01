@@ -5,23 +5,7 @@
 using HDF5
 using ArchGDAL
 using Printf
-using ArgParse
 
-function parse_commandline()
-    s = ArgParseSettings()
-
-    @add_arg_table s begin
-        "base_rast"
-            help = "Template raster to find the xsize and ysize of the matrix"
-            required = true
-        "h5_file"
-            help = "HDF File where data is stored"
-            required = true
-    end
-
-    return parse_args(s)
-end
-args = parse_commandline()
 
 function list_recursive(obj, parent="/", groups=true, datasets=true)
     result = []
@@ -48,11 +32,11 @@ function list_recursive(obj, parent="/", groups=true, datasets=true)
 end
 
 
-dataset = ArchGDAL.read(args["base_rast"], flags=ArchGDAL.OF_Raster | ArchGDAL.OF_ReadOnly)
+dataset = ArchGDAL.read(ARGS[2], flags=ArchGDAL.OF_Raster | ArchGDAL.OF_ReadOnly)
 ysize = ArchGDAL.height(dataset)
 xsize = ArchGDAL.width(dataset)
 
-cerrado_h5 = h5open(args["h5_file"], "r+")
+cerrado_h5 = h5open(ARGS[1], "r+")
 groups = list_recursive(cerrado_h5, "/", true, false)
 
 lines_to_read = 100

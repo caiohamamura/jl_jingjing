@@ -1,9 +1,0 @@
-name = "_03rasterize"
-uuid = "b4cd1eb8-1e24-11e8-3319-93036a3eb9f3"
-authors = ["Some One <someone@email.com>"]
-version = "0.1.0"
-
-[deps]
-ArchGDAL = "c9ce4bd3-c3d5-55b8-8973-c0e20141b8c3"
-ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
-HDF5 = "f67ccb44-e63f-5c2f-98bd-6dc0ccc4ba2f"

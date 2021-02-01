@@ -11,44 +11,6 @@ dataset = ArchGDAL.read("C:/Users/caioh/lsrc/r/prevFogo/cerrado_1000.tif", flags
 ysize = ArchGDAL.height(dataset)
 xsize = ArchGDAL.width(dataset)
 
-function update_stats(n, M1, M2, M3, M4, x)
-    n1 = n
-    n += 1
-    delta = x - M1
-    delta_n = delta / n
-    delta_n2 = delta_n * delta_n
-    term1 = delta * delta_n * n1
-    M1 += delta_n
-    M4 += term1 * delta_n2 * (n*n - 3*n + 3) + 6 * delta_n2 * M2 - 4 * delta_n * M3
-    M3 += term1 * delta_n * (n - 2) - 3 * delta_n * M2
-    M2 += term1
-    return n, M1, M2, M3, M4
-end
-
-function combine_stats(a_n, a_M1, a_M2, a_M3, a_M4, b_n, b_M1, b_M2, b_M3, b_M4)
-    combined_n = a_n + b_n
-    
-    delta = b_M1 - a_M1
-    delta2 = delta*delta
-    delta3 = delta*delta2
-    delta4 = delta2*delta2
-    
-    combined_M1 = (a_n*a_M1 + b_n*b_M1) / combined_n
-    
-    combined_M2 = a_M2 + b_M2 + 
-                  delta2 * a_n * b_n / combined_n
-    
-    combined_M3 = a_M3 + b_M3 + 
-                  delta3 * a_n * b_n * (a_n - b_n)/(combined_n*combined_n)
-    combined_M3 += 3.0*delta * (a_n*b_M2 - b_n*a_M2) / combined_n
-    
-    combined_M4 = a_M4 + b_M4 + delta4*a_n*b_n * (a_n*a_n - a_n*b_n + b_n*b_n) / 
-                  (combined_n*combined_n*combined_n)
-    combined_M4 += 6.0*delta2 * (a_n*a_n*b_M2 + b_n*b_n*a_M2)/(combined_n*combined_n) + 
-                  4.0*delta*(a_n*b_M3 - b_n*a_M3) / combined_n
-    
-    return combined_n, combined_M1, combined_M2, combined_M3, combined_M4
-end
 
 function list_recursive(obj, parent="/", groups=true, datasets=true)
     result = []

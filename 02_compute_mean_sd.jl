@@ -43,6 +43,20 @@ lines_to_read = 100
 
 counter = 0
 
+mean(sum::Float32, count::UInt8)::Float32 = count > 0 ? sum/count : -9999.0
+
+function sd(sumsq::Float32, sum::Float32, count::UInt8)::Float32
+    result = count > 1 ? (sumsq - ((sum^2)/count))/(count - 1) :
+        count == 1 ? 0 :
+        -9999.0
+
+    result > 0 ? sqrt(result) :
+    result == -9999.0 ? -9999.0 : 0
+end
+
+
+
+
 # group_name = groups[1]
 for group_name in groups
     global counter += 1
@@ -81,20 +95,9 @@ for group_name in groups
         mat_count = ds_count[lower_bound:upper_bound]
         mat_sum = ds_sum[lower_bound:upper_bound]
         mat_sumsq = ds_sumsq[lower_bound:upper_bound]
-        mask = mat_count .> 0
-        
-        mat_mean = mat_sum ./ mat_count
-        mat_mean[.!mask] = repeat([-9999.0], sum(.!mask))
-        
-        mask = mat_count .> 1
-        mat_var = repeat([-9999.0], size(mat_count)[1])
-        mat_var[mask] = (mat_sumsq[mask] - (mat_sum[mask] .^ 2 ./ mat_count[mask])) ./ (mat_count[mask] .- 1)
 
-        mask_no_data = mat_var .== -9999.0
-        mask = mat_var .< 0
-        mat_var[mask] = repeat([0], sum(mat_var .< 0))
-        mat_sd = sqrt.(mat_var)
-        mat_sd[mask_no_data] = repeat([-9999.0], sum(mask_no_data))
+        mat_mean = mean.(mat_sum, mat_count)
+        mat_sd = sd.(mat_sumsq, mat_sum, mat_count)
         
         ds_mean[lower_bound:upper_bound] = mat_mean
         ds_sd[lower_bound:upper_bound] = mat_sd

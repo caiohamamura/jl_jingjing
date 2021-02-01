@@ -75,7 +75,7 @@ for group_name in groups
     
 
         ds = cerrado_h5[@sprintf("%s/%s", group_name, ds_name)]
-        println("Processing dataset: ", ds_name, " (", counter, " of ", 3, ")")
+        println("Processing dataset: ", ds_name, " (", counter, " of ", 3 * size(groups), ")")
     # yy = 900
         for yy in 0:lines_to_read:ysize
             perc = 100 * yy / ysize

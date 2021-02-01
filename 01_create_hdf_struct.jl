@@ -79,14 +79,6 @@ function main(args)
             x_ind = Int32.(floor.((lons .+ 180) ./ x_res))
             indices = (y_ind .* xmax .+ x_ind)
             
-            do
-                ds_pavd = g["pavd_z"]
-                
-                pavd_agg = from_float32.(slice_get.((ds_pavd,), indices))
-                update_stats.(pavd_agg, pavd)
-                slice_set.((ds_pavd,), indices, to_float32.(pavd_agg))
-            end #do
-
             #col = "pavd"
             n_cols = size(cols)[1]
             
@@ -105,4 +97,6 @@ function main(args)
         end #groups
     end #files
     
-end
+end #main
+
+main(ARGS)

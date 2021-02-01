@@ -11,7 +11,7 @@ using Printf
 using ArgParse
 export main
 
-function main()
+function main(ARGS)
     function parse_commandline()
         s = ArgParseSettings()
     

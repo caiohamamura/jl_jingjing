@@ -1,19 +1,20 @@
 # using Pkg
 # Pkg.add("DataFrames")
 mutable struct AggregateStats
-    n::UInt32
+    n::Int32
     M1::Float32
     M2::Float32
     M3::Float32
     M4::Float32
+    AggregateStats(n, m1, m2, m3, m4) = new(reinterpret(Int32, n), m1, m2, m3, m4)
 end
 
 function to_float32(x::AggregateStats)::Array{Float32}
     [reinterpret(Float32, x.n), x.M1, x.M2, x.M3, x.M4]
 end
 
-function from_float32(x::Array{Float32})::AggregateStats
-    AggregateStats(reinterpret(UInt32, x[1]), x[2], x[3], x[4], x[5])
+function from_float32(x)::AggregateStats
+    AggregateStats(x[1], x[2], x[3], x[4], x[5])
 end
 
 
@@ -80,3 +81,4 @@ function agg_kur(agg::AggregateStats)
     ((agg.n - 1) / ((agg.n - 2) * (agg.n - 3))) * ((agg.n + 1) * g + 6)
 end
 
+agg_n(agg::AggregateStats) = agg.n

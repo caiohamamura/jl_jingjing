@@ -108,6 +108,8 @@ function main(args)
                 mask = g["l2b_quality_flag"][:] .== 1
                 seq = [1:n;]
                 seq_mask = seq[mask]
+                if size(seq_mask)[1] == (0,) continue end
+
                 seq_max = maximum(seq_mask)
                 seq_min = minimum(seq_mask)
                 slice = seq_min:seq_max
@@ -134,6 +136,7 @@ function main(args)
             this_inds = collect(zip(x_inds, y_inds))
             mask = haskey.(Ref(aggs), this_inds).==1
             masked_inds = this_inds[mask]
+            if size(masked_inds)[1] == 0 continue end
             masked_vals = vals[mask]
         
 
@@ -145,6 +148,7 @@ function main(args)
 
         mask = agg_n.(values(aggs)).>0
         masked_inds = the_inds[mask]
+        if size(masked_inds)[1] == 0 continue end
         inds_x = getindex.(masked_inds, 1)
         inds_y = getindex.(masked_inds, 2)
 

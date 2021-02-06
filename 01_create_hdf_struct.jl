@@ -128,7 +128,7 @@ function main(args)
                 
                 append!(vals, this_vals)    
             end # groups
-            @printf("\r....... Progress: 100.00%\n")
+            println("")
 
             
             this_inds = collect(zip(x_inds, y_inds))

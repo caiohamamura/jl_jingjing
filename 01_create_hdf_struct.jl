@@ -108,7 +108,7 @@ function main(args)
                 mask = g["l2b_quality_flag"][:] .== 1
                 seq = [1:n;]
                 seq_mask = seq[mask]
-                if size(seq_mask)[1] == (0,) continue end
+                if size(seq_mask)[1] == 0 continue end
 
                 seq_max = maximum(seq_mask)
                 seq_min = minimum(seq_mask)

@@ -85,65 +85,69 @@ function main(args)
                 
         # h5_file_path = list_h5[1]
         for h5_file_path in list_h5
-            file_count += 1
-            @printf("... Processing %s (%d of %d)\n", basename(h5_file_path), file_count, n_files)
-            in_h5 = h5open(h5_file_path, "r")
-            # HDF5.delete_object(ds_pavd)
-            groups = keys(in_h5)
-            groups = groups[startswith.(groups, "BEAM")]
+            try
+                file_count += 1
+                @printf("... Processing %s (%d of %d)\n", basename(h5_file_path), file_count, n_files)
+                in_h5 = h5open(h5_file_path, "r")
+                # HDF5.delete_object(ds_pavd)
+                groups = keys(in_h5)
+                groups = groups[startswith.(groups, "BEAM")]
 
 
-            n_groups = size(groups)[1]
-            x_inds = Array{Int32,1}()
-            y_inds = Array{Int32,1}()
-            vals = Array{Float32,1}()
+                n_groups = size(groups)[1]
+                x_inds = Array{Int32,1}()
+                y_inds = Array{Int32,1}()
+                vals = Array{Float32,1}()
 
-            # group = groups[1]
-            for group in groups
-                total_counter += 1
-                @printf("\r....... Progress: %.2f%%", 100.0 * total_counter / n_total)
-                g = in_h5[group]
-                n = HDF5.size(g["shot_number"])[1]
+                # group = groups[1]
+                for group in groups
+                    total_counter += 1
+                    @printf("\r....... Progress: %.2f%%", 100.0 * total_counter / n_total)
+                    g = in_h5[group]
+                    n = HDF5.size(g["shot_number"])[1]
+                    
+                    mask = g["l2b_quality_flag"][:] .== 1
+                    seq = [1:n;]
+                    seq_mask = seq[mask]
+                    if size(seq_mask)[1] == 0 continue end
+
+                    seq_max = maximum(seq_mask)
+                    seq_min = minimum(seq_mask)
+                    slice = seq_min:seq_max
+                    mask_slice = mask[slice]
+
+                    lats = g["geolocation/latitude_bin0"][slice][mask_slice]
+                    lons = g["geolocation/longitude_bin0"][slice][mask_slice]
+                    
+                    y_ind = Int32.(floor.((lats .- lat_min) ./ yres))
+                    append!(y_inds, y_ind)
+                    x_ind = Int32.(floor.((lons .- lon_min) ./ xres))
+                    append!(x_inds, x_ind)
+                    g["geolocation"]["elev_highestreturn"][1:10]
+                    this_vals = 
+                        col == "pavd" ? 
+                        dropdims(sum(g["pavd_z"][:,slice][:,mask_slice], dims=1); dims=1) : 
+                        g[col][slice][mask_slice]
+                    
+                    append!(vals, this_vals)    
+                end # groups
+                close(in_h5)
+                println("")
+
                 
-                mask = g["l2b_quality_flag"][:] .== 1
-                seq = [1:n;]
-                seq_mask = seq[mask]
-                if size(seq_mask)[1] == 0 continue end
-
-                seq_max = maximum(seq_mask)
-                seq_min = minimum(seq_mask)
-                slice = seq_min:seq_max
-                mask_slice = mask[slice]
-
-                lats = g["geolocation/latitude_bin0"][slice][mask_slice]
-                lons = g["geolocation/longitude_bin0"][slice][mask_slice]
-                
-                y_ind = Int32.(floor.((lats .- lat_min) ./ yres))
-                append!(y_inds, y_ind)
-                x_ind = Int32.(floor.((lons .- lon_min) ./ xres))
-                append!(x_inds, x_ind)
-                g["geolocation"]["elev_highestreturn"][1:10]
-                this_vals = 
-                    col == "pavd" ? 
-                    dropdims(sum(g["pavd_z"][:,slice][:,mask_slice], dims=1); dims=1) : 
-                    g[col][slice][mask_slice]
-                
-                append!(vals, this_vals)    
-            end # groups
-            println("")
-
+                this_inds = collect(zip(x_inds, y_inds))
+                mask = haskey.(Ref(aggs), this_inds).==1
+                masked_inds = this_inds[mask]
+                if size(masked_inds)[1] == 0 continue end
+                masked_vals = vals[mask]
             
-            this_inds = collect(zip(x_inds, y_inds))
-            mask = haskey.(Ref(aggs), this_inds).==1
-            masked_inds = this_inds[mask]
-            if size(masked_inds)[1] == 0 continue end
-            masked_vals = vals[mask]
-        
 
-            for (ind, val) in zip(masked_inds, masked_vals)
-                update_stats(aggs[ind], val)
+                for (ind, val) in zip(masked_inds, masked_vals)
+                    update_stats(aggs[ind], val)
+                end
+            catch
+                @sprintf("... Error processing the file: %s", h5_file_path)
             end
-            close(in_h5)
         end # files
 
         mask = agg_n.(values(aggs)).>0

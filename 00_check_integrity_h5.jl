@@ -44,7 +44,7 @@ function main(args)
             check_datasets = deepcopy(cols)
             append!(check_datasets, [L2B_QUALITY_FLAG, LATITUDE_BIN0, LONGITUDE_BIN0])
             check_all_datasets = ["$i/$j" for (i,j) in  Iterators.product(groups, check_datasets)]
-            if !(all(HDF5.haskey.(Ref(g), check_datasets))) 
+            if !(all(HDF5.haskey.(Ref(in_h5), check_datasets))) 
                 @warn "\nThe H5 file $h5_file_path is missing required columns!\n\n"
                 continue 
             end

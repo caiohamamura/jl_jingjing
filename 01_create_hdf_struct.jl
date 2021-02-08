@@ -10,7 +10,9 @@ using DataFrames
 using Printf
 
 include("old/04update_statistics.jl")
-
+LATITUDE_BIN0 = "geolocation/latitude_bin0"
+LONGITUDE_BIN0 = "geolocation/longitude_bin0"
+L2B_QUALITY_FLAG = "l2b_quality_flag"
 
 function create_stat_tif(aggs, masked_inds, stat_agg, xsize, ysize, inds_x, inds_y, base_raster, out_root, col, stat_name)
     stat = [stat_agg(aggs[(x, y)]) for (x,y) in masked_inds]
@@ -90,13 +92,13 @@ function main(args)
             in_h5 = try
                 h5open(h5_file_path, "r")
             catch e
-                @printf("... Error reading: %s\n", h5_file_path)
+                @warn "... Error reading: $h5_file_path \n"
                 continue
             end
             # HDF5.delete_object(ds_pavd)
             groups = keys(in_h5)
             groups = groups[startswith.(groups, "BEAM")]
-
+            
 
             n_groups = size(groups)[1]
             x_inds = Array{Int32,1}()
@@ -108,9 +110,19 @@ function main(args)
                 total_counter += 1
                 @printf("\r....... Progress: %.2f%%", 100.0 * total_counter / n_total)
                 g = in_h5[group]
-                n = HDF5.size(g["shot_number"])[1]
+                dataset_name = col == "pavd" ? "pavd_z" : col
+                g_ds = keys(g)
+                if !(L2B_QUALITY_FLAG in g_ds &&
+                    dataset_name in g_ds &&
+                    LATITUDE_BIN0 in g_ds &&
+                    LONGITUDE_BIN0 in g_ds
+                    ) 
+                    @warn "The H5 file $h5_file_path is missing required columns!"
+                    continue 
+                end
+                n = HDF5.size(g[L2B_QUALITY_FLAG])[1]
                 
-                mask = g["l2b_quality_flag"][:] .== 1
+                mask = g[L2B_QUALITY_FLAG][:] .== 1
                 seq = [1:n;]
                 seq_mask = seq[mask]
                 if size(seq_mask)[1] == 0 continue end
@@ -120,14 +132,14 @@ function main(args)
                 slice = seq_min:seq_max
                 mask_slice = mask[slice]
 
-                lats = g["geolocation/latitude_bin0"][slice][mask_slice]
-                lons = g["geolocation/longitude_bin0"][slice][mask_slice]
+                lats = g[LATITUDE_BIN0][slice][mask_slice]
+                lons = g[LONGITUDE_BIN0][slice][mask_slice]
                 
                 y_ind = Int32.(floor.((lats .- lat_min) ./ yres))
                 append!(y_inds, y_ind)
                 x_ind = Int32.(floor.((lons .- lon_min) ./ xres))
-                append!(x_inds, x_ind)
-                g["geolocation"]["elev_highestreturn"][1:10]
+                append!(x_inds, x_ind)                
+
                 this_vals = 
                     col == "pavd" ? 
                     dropdims(sum(g["pavd_z"][:,slice][:,mask_slice], dims=1); dims=1) : 

@@ -63,11 +63,6 @@ function main(args)
     ArchGDAL.destroy(tif)
     the_inds = collect(Iterators.product(1:xsize, 1:ysize))[mask]
     
-    dcpl = HDF5.create_property(HDF5.H5P_DATASET_CREATE)
-    HDF5.h5p_set_deflate(dcpl, 5)
-    HDF5.h5p_set_chunk(dcpl, 3, [Int64(floor(3.6 / xres)), Int64(floor(1.8 / yres*-1)), Int64(5)])
-    
-    
     cols = ["rh100", "pai", "pavd", "cover", "fhd_normal"]
         
     

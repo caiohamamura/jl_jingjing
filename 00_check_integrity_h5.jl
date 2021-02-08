@@ -34,38 +34,23 @@ function main(args)
             in_h5 = try
                 h5open(h5_file_path, "r")
             catch e
-                @warn "... Error reading: $h5_file_path\n\n\n"
+                @warn "... Error reading: $h5_file_path\n\n"
                 continue
             end
             # HDF5.delete_object(ds_pavd)
             groups = keys(in_h5)
             groups = groups[startswith.(groups, "BEAM")]
-            
 
-            n_groups = size(groups)[1]
-
-            # group = groups[1]
-            for group in groups
-                total_counter += 1
-                @printf("\r....... Progress: %.2f%%", 100.0 * total_counter / n_total)
-                g = in_h5[group]
-                
-                g_ds = keys(g)
-                if !(HDF5.haskey(g, L2B_QUALITY_FLAG) &&
-                    HDF5.haskey(g, LATITUDE_BIN0) &&
-                    HDF5.haskey(g, LONGITUDE_BIN0) && 
-                    all(HDF5.haskey.(Ref(g), cols))
-                    ) 
-                    @warn "\nThe H5 file $h5_file_path is missing required columns!\n\n\n"
-                    continue 
-                end
-            end # groups
-            
-            
+            check_datasets = deepcopy(cols)
+            append!(check_datasets, [L2B_QUALITY_FLAG, LATITUDE_BIN0, LONGITUDE_BIN0])
+            check_all_datasets = ["$i/$j" for (i,j) in  Iterators.product(groups, check_datasets)]
+            if !(all(HDF5.haskey.(Ref(g), check_datasets))) 
+                @warn "\nThe H5 file $h5_file_path is missing required columns!\n\n"
+                continue 
+            end
             close(in_h5)
             print("\x1b[1A\r")
         end # files
-    print("\x1b[1A")
 end # main
 
 if abspath(PROGRAM_FILE) == @__FILE__

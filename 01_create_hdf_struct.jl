@@ -82,17 +82,17 @@ function main(args)
     for col in ["rh100", "pai", "cover", "fhd_normal", "pavd"]
         file_count = 0
         col_count += 1
-        @printf("Processing %s (%d of %d)\n", col, col_count, 5)
+        @printf("\x1b[2KProcessing %s (%d of %d)\n", col, col_count, 5)
         aggs = Dict(i => AggregateStats(0f32,0,0,0,0) for i in the_inds)
                 
         # h5_file_path = list_h5[1]
         for h5_file_path in list_h5
             file_count += 1
-            @printf("... Processing %s (%d of %d)\n", basename(h5_file_path), file_count, n_files)
+            @printf("\x1b[2K... Processing %s (%d of %d)\n", basename(h5_file_path), file_count, n_files)
             in_h5 = try
                 h5open(h5_file_path, "r")
             catch e
-                @warn "... Error reading: $h5_file_path \n"
+                @warn "... Error reading: $h5_file_path"
                 continue
             end
             # HDF5.delete_object(ds_pavd)
@@ -117,7 +117,7 @@ function main(args)
                     LATITUDE_BIN0 in g_ds &&
                     LONGITUDE_BIN0 in g_ds
                     ) 
-                    @warn "The H5 file $h5_file_path is missing required columns!"
+                    @warn "\nThe H5 file $h5_file_path is missing required columns!"
                     continue 
                 end
                 n = HDF5.size(g[L2B_QUALITY_FLAG])[1]
@@ -147,7 +147,7 @@ function main(args)
                 
                 append!(vals, this_vals)    
             end # groups
-            println("")
+            
 
             
             this_inds = collect(zip(x_inds, y_inds))
@@ -161,6 +161,7 @@ function main(args)
                 update_stats(aggs[ind], val)
             end
             close(in_h5)
+            print("\x1b[1A")
         end # files
 
         mask = agg_n.(values(aggs)).>0
@@ -175,7 +176,7 @@ function main(args)
         create_stat_tif(aggs, masked_inds, agg_kur, xsize, ysize, inds_x, inds_y, base_float_path, out_root, col, "kur")
         create_stat_tif(aggs, masked_inds, agg_skew, xsize, ysize, inds_x, inds_y, base_float_path, out_root, col, "skew")
     end # cols
-    
+    print("\x1b[1A")
 end # main
 
 if abspath(PROGRAM_FILE) == @__FILE__

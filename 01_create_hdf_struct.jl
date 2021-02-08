@@ -82,13 +82,13 @@ function main(args)
     for col in ["rh100", "pai", "cover", "fhd_normal", "pavd"]
         file_count = 0
         col_count += 1
-        @printf("\x1b[2KProcessing %s (%d of %d)\n", col, col_count, 5)
+        @printf("\x1b[2K\rProcessing %s (%d of %d)\n", col, col_count, 5)
         aggs = Dict(i => AggregateStats(0f32,0,0,0,0) for i in the_inds)
                 
         # h5_file_path = list_h5[1]
         for h5_file_path in list_h5
             file_count += 1
-            @printf("\x1b[2K... Processing %s (%d of %d)\n", basename(h5_file_path), file_count, n_files)
+            @printf("\x1b[2K\r... Processing %s (%d of %d)\n", basename(h5_file_path), file_count, n_files)
             in_h5 = try
                 h5open(h5_file_path, "r")
             catch e
@@ -161,7 +161,7 @@ function main(args)
                 update_stats(aggs[ind], val)
             end
             close(in_h5)
-            print("\x1b[1A\x1b[1A\r")
+            print("\x1b[1A\r")
         end # files
 
         mask = agg_n.(values(aggs)).>0

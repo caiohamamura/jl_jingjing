@@ -112,12 +112,12 @@ function main(args)
                 g = in_h5[group]
                 dataset_name = col == "pavd" ? "pavd_z" : col
                 g_ds = keys(g)
-                if !(L2B_QUALITY_FLAG in g_ds &&
-                    dataset_name in g_ds &&
-                    LATITUDE_BIN0 in g_ds &&
-                    LONGITUDE_BIN0 in g_ds
+                if !(HDF5.haskey(g, L2B_QUALITY_FLAG) &&
+                    HDF5.haskey(g, dataset_name) &&
+                    HDF5.haskey(g, LATITUDE_BIN0) &&
+                    HDF5.haskey(g, LONGITUDE_BIN0)
                     ) 
-                    @warn "\nThe H5 file $h5_file_path is missing required columns!"
+                    @warn "\n\nThe H5 file $h5_file_path is missing required columns!"
                     continue 
                 end
                 n = HDF5.size(g[L2B_QUALITY_FLAG])[1]

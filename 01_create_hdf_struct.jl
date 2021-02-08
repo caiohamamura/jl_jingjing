@@ -117,7 +117,7 @@ function main(args)
                     HDF5.haskey(g, LATITUDE_BIN0) &&
                     HDF5.haskey(g, LONGITUDE_BIN0)
                     ) 
-                    @warn "\n\nThe H5 file $h5_file_path is missing required columns!"
+                    @warn "\nThe H5 file $h5_file_path is missing required columns!\n\n"
                     continue 
                 end
                 n = HDF5.size(g[L2B_QUALITY_FLAG])[1]
@@ -161,7 +161,7 @@ function main(args)
                 update_stats(aggs[ind], val)
             end
             close(in_h5)
-            print("\x1b[1A")
+            print("\x1b[1A\x1b[1A\r")
         end # files
 
         mask = agg_n.(values(aggs)).>0

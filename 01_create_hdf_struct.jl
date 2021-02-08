@@ -106,7 +106,6 @@ function main(args)
                 @printf("\r....... Progress: %.2f%%", 100.0 * total_counter / n_total)
                 g = in_h5[group]
                 dataset_name = col == "pavd" ? "pavd_z" : col
-                g_ds = keys(g)
                 if !(HDF5.haskey(g, L2B_QUALITY_FLAG) &&
                     HDF5.haskey(g, dataset_name) &&
                     HDF5.haskey(g, LATITUDE_BIN0) &&

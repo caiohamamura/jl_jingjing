@@ -52,7 +52,6 @@ function main(args)
                 
                 g_ds = keys(g)
                 if !(HDF5.haskey(g, L2B_QUALITY_FLAG) &&
-                    HDF5.haskey(g, dataset_name) &&
                     HDF5.haskey(g, LATITUDE_BIN0) &&
                     HDF5.haskey(g, LONGITUDE_BIN0) && 
                     all(HDF5.haskey.(Ref(g), cols))

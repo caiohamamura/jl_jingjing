@@ -22,7 +22,7 @@ function create_raster(output::AbstractString, xres::Float64, yres::Float64; ul_
         height=height,
         nbands=1,
         dtype=dtype,
-        options=["COMPRESS=DEFLATE", "TILED=YES", "BLOCKXSIZE=$tile_size", "BLOCKYSIZE=$tile_size"])
+        options=["COMPRESS=DEFLATE", "BIGTIFF=YES", "TILED=YES", "BLOCKXSIZE=$tile_size", "BLOCKYSIZE=$tile_size"])
     try
         ArchGDAL.setgeotransform!(tif, [ul_lon, xres, 0.0, ul_lat, 0.0, -yres])
         if !occursin(r"^U",string(dtype))
@@ -37,7 +37,7 @@ function create_raster(output::AbstractString, xres::Float64, yres::Float64; ul_
 end
 
 
-# julia 02_create_hdf_raster_notmemory.jl "E:/Documentos/Downloads/" "C:/Users/caioh/Desktop/mundo/gedi_out" 51.7 -180 -51.7 180 1000 1024
+# julia 02_create_hdf_raster_notmemory.jl "G:\01_GEDI\02_Level2B" "I:\01_GlobalRasters_L2B\gedi_out" 51.7 -180 -51.7 180 25 1024
 # args = ["E:/Documentos/Downloads/", "C:/Users/caioh/Desktop/mundo/gedi_out", "51.7", "-180", "-51.7", "180", "1000", "1024"]
 function main(args)
     n_lines_read = 100

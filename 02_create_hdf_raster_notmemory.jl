@@ -154,11 +154,13 @@ function main(args)
 
             blocks_x = Int32.(floor.(x_inds / tile_size))
             blocks_y = Int32.(floor.(y_inds / tile_size))
-
             # xblock, yblock = 9, 1
             
 
             for (xblock, yblock) in unique(zip(blocks_x, blocks_y))
+                if xblock < 0 || xblock >= xsize || yblock < 0 || yblock >= ysize
+                    continue
+                end
                 mask = (blocks_x .== xblock) .& (blocks_y .== yblock)
                 m1_buffer = Array{Float32}(undef, tile_size, tile_size)
                 m2_buffer = Array{Float32}(undef, tile_size, tile_size)
